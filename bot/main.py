@@ -1,13 +1,14 @@
 import asyncio
 
-from bot.loader import app
+from pyrogram import compose
+from bot.loader import app1, app2
 
 import handlers
 
 
-def main():
+async def main():
     print("Bot started.")
-    app.run()
+    await compose([app1, app2])
 
 
 if __name__ == '__main__':
