@@ -12,20 +12,22 @@ from bot.sending import is_valid_time_format, sending
 
 
 @app1.on_message(filters.chat([config.rent_channel_id, config.sell_channel_id]))
-@app2.on_message(filters.chat([config.rent_channel_id, config.sell_channel_id]))
 async def new_posts(client, message: Message):
     """
     Обрабатывает новые посты в каналах, моментально пересылает в группы
     """
     for spam_group in config.groups_to_spam:
         try:
-            await app1.copy_message(chat_id=spam_group, from_chat_id=message.chat.id, message_id=message.id)
+            if message.caption:
+                await app1.copy_media_group(chat_id=spam_group, from_chat_id=message.chat.id, message_id=message.id)
+            elif message.text:
+                await app1.copy_message(chat_id=spam_group, from_chat_id=message.chat.id, message_id=message.id)
         except PeerIdInvalid as e:
             for admin in config.admins:
                 await app1.send_message(admin, parse_mode=ParseMode.HTML,
                                        text=f"<a href=https://docs.pyrogram.org/api/errors/bad-request#:~:text=is%20currently%20limited-,PEER_ID_INVALID,-The%20peer%20id>ОШИБКА.</a>\n"
                                             f"Познакомьтесь с чатом id: {spam_group}")
-
+        await asyncio.sleep(.1)
 
 @app1.on_message(filters.chat(config.admins) & filters.command('current'))
 @app2.on_message(filters.chat(config.admins) & filters.command('current'))
