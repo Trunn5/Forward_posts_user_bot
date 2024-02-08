@@ -33,6 +33,7 @@ async def current_tasks(client, message: Message):
     """Присылает текущие таймслоты на пересылку"""
     text = "Текущие расписание постов:\n" + '\n'.join([time for _, time, _ in scheduler.tasks])
     if len(scheduler.tasks) == 0: text += "Пусто"
+    # print(message.text)
     await message.reply(text)
 
 
