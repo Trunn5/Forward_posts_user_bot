@@ -1,9 +1,10 @@
-С сайта my.telegram.org/auth достаём айди и хеш аккаунтов.\n
-Прописываем их в переменные окружения.\n
-API_ID_1 = os.getenv("API_ID_1")\n
-API_HASH_1 = os.getenv("API_HASH_1")\n
-API_ID_2 = os.getenv("API_ID_2")\n
-API_HASH_2 = os.getenv("API_HASH_2")\n
+С сайта my.telegram.org/auth достаём айди и хеш аккаунтов.
+Прописываем их в переменные окружения.
+
+API_ID_1 = os.getenv("API_ID_1").
+API_HASH_1 = os.getenv("API_HASH_1").
+API_ID_2 = os.getenv("API_ID_2").
+API_HASH_2 = os.getenv("API_HASH_2").
 
 В config.py:
  - айди админов в admins
