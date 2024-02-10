@@ -40,11 +40,10 @@ async def forwards_to_chats(channel_id: int, groups: list[int], count: int):
             else:
                 app = app2
 
+            mes = None
             if post.media_group_id:
                 last_media_group_ids.add(post.media_group_id)
                 mes = await app.copy_media_group(chat_id=spam_group, from_chat_id=post.chat.id, message_id=post.id)
-            else:
-                mes = await app.copy_message(chat_id=spam_group, from_chat_id=post.chat.id, message_id=post.id)
 
             # если сообщение успешно отослано, уменьшаем лимит
             if mes:
