@@ -9,8 +9,8 @@ from bot import config
 from bot.loader import app1, app2, scheduler, clear_dailys
 from pyrogram import filters
 
-from bot.sending import is_valid_time_format, sending, check_stop_sign, forward_post, recently_media_groups, clear_daily
-
+from bot.sending import is_valid_time_format, sending, check_stop_sign, forward_post, recently_media_groups, \
+    clear_daily, get_number_posts, set_number_posts
 
 SEND = True
 
@@ -95,7 +95,7 @@ async def delete(client, message: Message):
 
 @app1.on_message(filters.chat(config.admins) & filters.command('switch'))
 @app2.on_message(filters.chat(config.admins) & filters.command('switch'))
-async def delete(client, message: Message):
+async def switch(client, message: Message):
     """ вкл/выкл пересылки """
     global SEND
     if SEND:
@@ -103,3 +103,15 @@ async def delete(client, message: Message):
     else:
         SEND = True
     await message.reply(f"моментальная пересылка {'вкл' if SEND else 'выкл'}")
+
+
+@app1.on_message(filters.chat(config.admins) & filters.command('set_posts'))
+@app2.on_message(filters.chat(config.admins) & filters.command('set_posts'))
+async def set_posts(client, message: Message):
+    """ установить нужное количество постов для пересылки """
+    global g
+    try:
+        set_number_posts(int(message.command[1]))
+        await message.reply(f"Количество постов {get_number_posts()} установлено")
+    except:
+        await message.reply("Введите /set_posts число")

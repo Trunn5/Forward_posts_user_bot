@@ -27,12 +27,24 @@ def clear_daily():
     daily_media_groups.clear()
 
 
+NUMBER_POSTS = 6
+def get_number_posts():
+    global NUMBER_POSTS
+    return NUMBER_POSTS
+
+def set_number_posts(x: int):
+    global NUMBER_POSTS
+    NUMBER_POSTS = x
+
+
+
+
 async def sending():
     """
     Функция для пересылки по расписанию.
     """
-    await forwards_to_chats(config.rent_channel_id, config.groups_for_rent, 6)
-    # await forwards_to_chats(config.sell_channel_id, config.groups_for_sell, 6)
+    await forwards_to_chats(config.rent_channel_id, config.groups_for_rent, get_number_posts())
+    # await forwards_to_chats(config.sell_channel_id, config.groups_for_sell, get_number_posts())
 
 
 async def forwards_to_chats(channel_id: int, groups: list[int], limit: int):
