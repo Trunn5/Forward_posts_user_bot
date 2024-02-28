@@ -1,33 +1,60 @@
 import asyncio
+from pprint import pprint
 
 from pyrogram.enums import ParseMode
 from pyrogram.errors import PeerIdInvalid
 from pyrogram.types import Message
 
 from bot import config
-from bot.loader import app1, app2, scheduler
+from bot.loader import app1, app2, scheduler, clear_dailys
 from pyrogram import filters
 
-from bot.sending import is_valid_time_format, sending
+from bot.sending import is_valid_time_format, sending, check_stop_sign, forward_post, recently_media_groups, clear_daily
 
 
-@app1.on_message(filters.chat([config.rent_channel_id, config.sell_channel_id]))
-async def new_posts(client, message: Message):
+SEND = True
+
+
+@app1.on_message(filters.chat(config.rent_channel_id))
+async def new_post_rent(client, message: Message):
     """
-    Обрабатывает новые посты в каналах, моментально пересылает в группы
+    Обрабатывает новые посты в канале для аренды, моментально пересылает в группы для аренды
     """
-    for spam_group in config.groups_to_spam:
-        try:
-            if message.caption:
-                await app1.copy_media_group(chat_id=spam_group, from_chat_id=message.chat.id, message_id=message.id)
-            elif message.text:
-                await app1.copy_message(chat_id=spam_group, from_chat_id=message.chat.id, message_id=message.id)
-        except PeerIdInvalid as e:
-            for admin in config.admins:
-                await app1.send_message(admin, parse_mode=ParseMode.HTML,
-                                       text=f"<a href=https://docs.pyrogram.org/api/errors/bad-request#:~:text=is%20currently%20limited-,PEER_ID_INVALID,-The%20peer%20id>ОШИБКА.</a>\n"
-                                            f"Познакомьтесь с чатом id: {spam_group}")
-        await asyncio.sleep(.1)
+    if not SEND:
+        return
+    # проверяем что такую медиа группу мы уже отправили
+    if message.media_group_id and message.media_group_id in recently_media_groups:
+        return
+    else: # добавляем новую media группу в множество недавних
+        if len(recently_media_groups) > 10:
+            recently_media_groups.clear()
+        recently_media_groups.add(message.media_group_id)
+
+    # ждём прогрузки данных в телеграмме
+    await asyncio.sleep(5)
+
+    await forward_post(client, message, config.groups_for_rent)
+
+
+# @app1.on_message(filters.chat(config.sell_channel_id))
+# async def new_post_sell(client, message: Message):
+#     """
+#     Обрабатывает новые посты в канале для продажи, моментально пересылает в группы для продажи
+#     """
+#     if not SEND:
+#         return
+# # проверяем что такую медиа группу мы уже отправили
+#     if message.media_group_id and message.media_group_id in recently_media_groups:
+#         return
+#     else: # добавляем новую media группу в множество недавних
+#         if len(recently_media_groups) > 10:
+#             recently_media_groups.clear()
+#         recently_media_groups.add(message.media_group_id)
+#
+#     # ждём прогрузки данных в телеграмме
+#     await asyncio.sleep(5)
+#     await forward_post(client, message, config.groups_for_sell)
+
 
 @app1.on_message(filters.chat(config.admins) & filters.command('current'))
 @app2.on_message(filters.chat(config.admins) & filters.command('current'))
@@ -47,7 +74,8 @@ async def add(client, message: Message):
         await message.reply("Введите /add HH:MM")
         return
     time = message.command[1]
-
+    if len(clear_dailys.tasks) == 0:
+        await clear_dailys.add_task(task=clear_daily, run_time="00:00")
     await scheduler.add_task(task=sending, run_time=time)
     await current_tasks(app1, message)
 
@@ -64,3 +92,14 @@ async def delete(client, message: Message):
         await message.reply(f"Успешно удалено время {time}")
     await current_tasks(client, message)
 
+
+@app1.on_message(filters.chat(config.admins) & filters.command('switch'))
+@app2.on_message(filters.chat(config.admins) & filters.command('switch'))
+async def delete(client, message: Message):
+    """ вкл/выкл пересылки """
+    global SEND
+    if SEND:
+        SEND = False
+    else:
+        SEND = True
+    await message.reply(f"моментальная пересылка {'вкл' if SEND else 'выкл'}")

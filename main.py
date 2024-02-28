@@ -5,7 +5,7 @@ from pyrogram import compose
 from bot import config
 from bot.loader import app1, app2
 
-import handlers
+from bot import handlers
 
 
 def main():
