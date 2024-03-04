@@ -91,7 +91,7 @@ def check_stop_sign(message: Message):
 
 async def forward_post(client: Client, message: Message, groups: list[int, str]):
     # === СТОП ЗНАК ===
-    if check_stop_sign(message):
+    if check_stop_sign(message) or (not message.caption):
         return
     # ===============================
     for spam_group in groups:
