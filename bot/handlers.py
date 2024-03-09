@@ -6,34 +6,34 @@ from pyrogram.errors import PeerIdInvalid
 from pyrogram.types import Message
 
 from bot import config
-from bot.loader import app1, app2, scheduler, clear_dailys
+from bot.loader import app1, app2, scheduler
 from pyrogram import filters
 
-from bot.sending import is_valid_time_format, sending, check_stop_sign, forward_post, recently_media_groups, \
+from bot.sending import is_valid_time_format, sending, check_stop_sign, forward_post, \
     clear_daily, get_number_posts, set_number_posts
+
 
 SEND = True
 
-
+recently_media_groups = set()
 @app1.on_message(filters.chat(config.rent_channel_id))
 async def new_post_rent(client, message: Message):
     """
     Обрабатывает новые посты в канале для аренды, моментально пересылает в группы для аренды
     """
-    if not SEND:
+    if not SEND or not message.media_group_id:
         return
     # проверяем что такую медиа группу мы уже отправили
-    if message.media_group_id and message.media_group_id in recently_media_groups:
-        return
-    else: # добавляем новую media группу в множество недавних
-        if len(recently_media_groups) > 10:
-            recently_media_groups.clear()
+    if message.media_group_id not in recently_media_groups:
+
         recently_media_groups.add(message.media_group_id)
 
-    # ждём прогрузки данных в телеграмме
-    await asyncio.sleep(5)
+        # ждём прогрузки данных в телеграмме
+        await asyncio.sleep(5)
 
-    await forward_post(client, message, config.groups_for_rent)
+        await forward_post(client, message, config.groups_for_rent)
+
+
 
 
 # @app1.on_message(filters.chat(config.sell_channel_id))
@@ -74,8 +74,6 @@ async def add(client, message: Message):
         await message.reply("Введите /add HH:MM")
         return
     time = message.command[1]
-    if len(clear_dailys.tasks) == 0:
-        await clear_dailys.add_task(task=clear_daily, run_time="00:00")
     await scheduler.add_task(task=sending, run_time=time)
     await current_tasks(app1, message)
 

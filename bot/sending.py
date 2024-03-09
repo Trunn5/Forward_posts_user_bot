@@ -1,5 +1,6 @@
 import asyncio
 import re
+from datetime import datetime
 
 from pyrogram import Client
 from pyrogram.types import Message, InputMedia, InputMediaPhoto
@@ -10,7 +11,7 @@ from bot.loader import app1, app2
 from random import randint
 
 
-recently_media_groups = set()
+
 daily_media_groups = set()
 def get_daily():
     global daily_media_groups
@@ -54,27 +55,30 @@ async def forwards_to_chats(channel_id: int, groups: list[int], limit: int):
     if len(groups) == 0:
         return
 
-    messages1 = []
+    messages = []
     messages2 = []
 
     async for post in app1.get_chat_history(chat_id=channel_id, limit=2000):
-        if post.media_group_id and post.caption and not check_stop_sign(post) and post.media_group_id not in get_daily():
-            messages1 += [post]
+        if (post.media_group_id and post.caption and not check_stop_sign(post)
+                and (str(post.id) + str(post.media_group_id) + '.'+datetime.now().strftime("%d.%m.%Y")) not in get_daily()):
+            messages += [post]
+            add_daily(str(post.id) + str(post.media_group_id) + '.'+datetime.now().strftime("%d.%m.%Y"))
+        if len(messages) == limit:
+            break
 
     async for post in app2.get_chat_history(chat_id=channel_id, limit=2000):
-        if post.media_group_id and post.caption and not check_stop_sign(post) and post.media_group_id not in get_daily():
+        if post.media_group_id and post.caption and not check_stop_sign(
+                post) and (str(post.id) + str(post.media_group_id) + '.'+datetime.now().strftime("%d.%m.%Y")) not in get_daily():
             messages2 += [post]
+            add_daily(str(post.id) + str(post.media_group_id) + '.'+datetime.now().strftime("%d.%m.%Y"))
+        if len(messages2) == limit:
+            break
 
-    print(min(limit, len(messages1)))
-    for i in range(min(limit, len(messages1))):
-        print(i)
+    for i in range(min(limit, len(messages))):
         if i % 2 == 0:
-            await forward_post(app1, messages1[i], groups)
+            await forward_post(app1, messages[i], groups)
         else:
             await forward_post(app2, messages2[i], groups)
-        print(123)
-        add_daily(messages1[i].media_group_id)
-        add_daily(messages2[i].media_group_id)
         print(get_daily())
         await asyncio.sleep(config.spam_interval)
 

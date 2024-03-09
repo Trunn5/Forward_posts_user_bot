@@ -12,4 +12,3 @@ app1 = Client("my_account", api_id=api_id_1, api_hash=api_hash_1, workdir='bot')
 app2 = Client("my_account2", api_id=api_id_2, api_hash=api_hash_2, workdir='bot')
 
 scheduler = AsyncScheduler()
-clear_dailys = AsyncScheduler()
