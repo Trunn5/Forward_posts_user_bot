@@ -16,6 +16,17 @@ from bot.sending import is_valid_time_format, sending, check_stop_sign, forward_
 SEND = True
 
 recently_media_groups = set()
+
+@app1.on_message(filters.user(config.admins) & filters.command("sbor"))
+async def on_message(client, message: Message):
+    await message.delete()
+    with open(f"{message.chat.title}.txt", 'w') as f:
+        print("Sbor userov s grupi: ", message.chat.title)
+        async for member in message.chat.get_members():
+            f.write(f"{member.user.username}\n")
+
+
+
 @app1.on_message(filters.chat(config.rent_channel_id))
 async def new_post_rent(client, message: Message):
     """
@@ -113,3 +124,5 @@ async def set_posts(client, message: Message):
         await message.reply(f"Количество постов {get_number_posts()} установлено")
     except:
         await message.reply("Введите /set_posts число")
+
+
