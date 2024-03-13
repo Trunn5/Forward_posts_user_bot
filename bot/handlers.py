@@ -9,13 +9,15 @@ from bot import config
 from bot.loader import app1, app2, scheduler
 from pyrogram import filters
 
-from bot.sending import is_valid_time_format, sending, check_stop_sign, forward_post, \
-    clear_daily, get_number_posts, set_number_posts
+from bot.sending import is_valid_time_format, sending, check_stop_sign, forward_post, get_number_posts, set_number_posts
 
 
-SEND = True
+class Sending:
+    SEND = True
+
 
 recently_media_groups = set()
+
 
 @app1.on_message(filters.user(config.admins) & filters.command("sbor"))
 async def on_message(client, message: Message):
@@ -27,22 +29,19 @@ async def on_message(client, message: Message):
 
 
 
-@app1.on_message(filters.chat(config.rent_channel_id))
-async def new_post_rent(client, message: Message):
-    """
-    Обрабатывает новые посты в канале для аренды, моментально пересылает в группы для аренды
-    """
-    if not SEND or not message.media_group_id:
-        return
-    # проверяем что такую медиа группу мы уже отправили
-    if message.media_group_id not in recently_media_groups:
+# @app1.on_message()
+# async def new_post_rent(client, message: Message):
+#
+#     if not Sending.SEND or not message.media_group_id:
+#         return
+#     # проверяем что такую медиа группу мы уже отправили
+#     if message.media_group_id not in recently_media_groups:
+#
+#         recently_media_groups.add(message.media_group_id)
+#
+#         # ждём прогрузки данных в телеграмме
+#         await asyncio.sleep(5)
 
-        recently_media_groups.add(message.media_group_id)
-
-        # ждём прогрузки данных в телеграмме
-        await asyncio.sleep(5)
-
-        await forward_post(client, message, config.groups_for_rent)
 
 
 
@@ -106,12 +105,11 @@ async def delete(client, message: Message):
 @app2.on_message(filters.chat(config.admins) & filters.command('switch'))
 async def switch(client, message: Message):
     """ вкл/выкл пересылки """
-    global SEND
-    if SEND:
-        SEND = False
+    if Sending.SEND:
+        Sending.SEND = False
     else:
-        SEND = True
-    await message.reply(f"моментальная пересылка {'вкл' if SEND else 'выкл'}")
+        Sending.SEND = True
+    await message.reply(f"моментальная пересылка {'вкл' if Sending.SEND else 'выкл'}")
 
 
 @app1.on_message(filters.chat(config.admins) & filters.command('set_posts'))

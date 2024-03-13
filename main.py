@@ -6,7 +6,7 @@ from bot import config
 from bot.loader import app1, app2
 
 from bot import handlers
-
+from bot import album_handler
 
 def main():
     print("Bot started.")
