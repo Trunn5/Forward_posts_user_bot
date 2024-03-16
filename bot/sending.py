@@ -1,5 +1,6 @@
 import asyncio
 import re
+import time
 from datetime import datetime
 
 from pyrogram import Client
@@ -10,30 +11,21 @@ from bot.loader import app1, app2
 
 from random import randint
 
-
-NUMBER_POSTS = 6
-
-
-def get_number_posts():
-    global NUMBER_POSTS
-    return NUMBER_POSTS
-
-
-def set_number_posts(x: int):
-    global NUMBER_POSTS
-    NUMBER_POSTS = x
+from bot.utils import check_stop_sign
+import globals
 
 
 async def sending():
     """
     Функция для пересылки по расписанию.
     """
-    await forwards_to_chats(config.rent_channel_id, config.groups_for_rent, get_number_posts())
-    # await forwards_to_chats(config.sell_channel_id, config.groups_for_sell, get_number_posts())
+    await forwards_to_chats(config.rent_channel_id, config.groups_for_rent, globals.NUMBER_FORWARD_POSTS)
+    # await forwards_to_chats(config.sell_channel_id, config.groups_for_sell, globals.NUMBER_FORWARD_POSTS)
 
 
 # contains date: client: media groups
 class DailyAlbums:
+    """Contains information about media_groups that client already has sent."""
     todays_albums = list()
 
     def __iadd__(cls, x: tuple[Client, int]):
@@ -55,8 +47,8 @@ async def forwards_to_chats(channel_id: int, groups: list[int], limit: int):
     daily_albums = DailyAlbums()
     messages = []
     messages2 = []
-    media_groups_ids = []
-    date = datetime.now().strftime("%d.%m.%Y")
+
+    # different instances of Message for clients
     async for post in app1.get_chat_history(chat_id=channel_id, limit=3000):
         if post.media_group_id and post.caption and (app1, post.media_group_id) not in daily_albums:
             messages += [post]
@@ -73,22 +65,17 @@ async def forwards_to_chats(channel_id: int, groups: list[int], limit: int):
             break
         await asyncio.sleep(0.1)
 
+
+
     for i in range(min(limit, len(messages))):
-        if i % 2 == 0:
+        sent = False
+        if (i%2==0 or not globals.IS_WORK_2) and globals.IS_WORK_1:
             await forward_post(app1, messages[i], groups)
-        else:
+            sent = True
+
+        if not sent and globals.IS_WORK_2:
             await forward_post(app2, messages2[i], groups)
-        await asyncio.sleep(config.spam_interval)
 
-
-def is_valid_time_format(time_str):
-    """Проверяют строку на формат HH:MM"""
-    time_pattern = re.compile(r'^[0-2][0-9]:[0-5][0-9]$')
-    return bool(time_pattern.match(time_str))
-
-
-def check_stop_sign(message: Message):
-    return "⛔️" in str(message.caption) or "⛔️" in str(message.text)
 
 
 async def forward_post(client: Client, message: Message, groups: list[int, str]):
@@ -96,9 +83,12 @@ async def forward_post(client: Client, message: Message, groups: list[int, str])
     if check_stop_sign(message) or not (message.caption or message.text):
         return
     # ===============================
-    for spam_group in groups:
+    for i, spam_group in enumerate(groups):
         group_id, reply_id = (spam_group, None) if '_' not in str(spam_group) else list(
             map(int, str(spam_group).split('_')))
+        # sleep for full sleep interval
+        sleep_time = max(0, globals.spam_intervals[spam_group] - (time.time() - globals.spam_intervals[group_id]))
+        await asyncio.sleep(sleep_time+0.1)
         try:
             if message.media_group_id:
                 await client.copy_media_group(chat_id=group_id, from_chat_id=message.chat.id, message_id=message.id,
@@ -108,4 +98,3 @@ async def forward_post(client: Client, message: Message, groups: list[int, str])
         except Exception as e:
             print(e)
             print(type(e))
-        await asyncio.sleep(2)
