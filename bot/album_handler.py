@@ -1,6 +1,5 @@
 import asyncio
 import traceback
-from dataclasses import dataclass
 from collections import defaultdict
 from typing import Coroutine, TypeVar
 
@@ -8,8 +7,10 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 
 from bot import config
-from bot.loader import app1
+from bot.loader import clientManager
 from bot.sending import forward_post
+from bot.utils import Album
+from bot import globals
 
 _tasks = set()
 T = TypeVar("T")
@@ -23,18 +24,15 @@ def background(coro: Coroutine[None, None, T]) -> asyncio.Task[T]:
     return task
 
 
-@dataclass
-class Album:
-    media_group_id: str
-    messages: list[Message]
 
 
 # chat_id: group_id: album
 _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 
 
-@app1.on_message(filters.media_group)
+@(clientManager.clients[0]).on_message(filters.media_group)
 async def on_media_group(client: Client, message: Message):
+    print("HANDLER: GOT NEW MEDIA GROUP")
     try:
         chat_id = message.chat.id
         media_group_id = message.media_group_id
@@ -42,14 +40,14 @@ async def on_media_group(client: Client, message: Message):
             return
 
         if media_group_id not in _albums[chat_id]:
-            album = Album(messages=[message], media_group_id=media_group_id)
+            album = Album(photos=[message.photo.file_id], media_group_id=media_group_id,
+                          caption=(message.caption or ""), chat_id=chat_id)
             _albums[chat_id][media_group_id] = album
 
             async def task():
                 await asyncio.sleep(1)
                 _albums[chat_id].pop(media_group_id, None)
                 try:
-                    album.messages.sort(key=lambda m: m.id)
                     await on_album(client, album)
                 except Exception:
                     traceback.print_exc()
@@ -57,7 +55,7 @@ async def on_media_group(client: Client, message: Message):
             background(task())
         else:
             album = _albums[chat_id][media_group_id]
-            album.messages.append(message)
+            album.photos.append(message.photo.file_id)
     finally:
         message.continue_propagation()
 
@@ -66,5 +64,8 @@ async def on_album(client: Client, album: Album):
     """
     Обрабатывает новые альбомы
     """
-    if album.messages[0].chat.id == config.rent_channel_id:
-        await forward_post(client, album.messages[0], config.groups_for_rent)
+    if not globals.SEND:
+        return
+
+    if album.chat_id == config.rent_channel_id:
+        await forward_post(client, album, config.groups_for_rent)

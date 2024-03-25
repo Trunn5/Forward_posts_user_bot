@@ -2,9 +2,6 @@ from bot import config
 
 SEND = True
 NUMBER_FORWARD_POSTS = 6
-IS_WORK_1 = True
-IS_WORK_2 = True
-
 
 # waiting time between sending for special groups: dict
 spam_intervals = config.spam_intervals

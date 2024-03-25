@@ -3,11 +3,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+api_ids = []
+api_hashes = []
 
-API_ID_1 = os.getenv("API_ID_1")
-API_HASH_1 = os.getenv("API_HASH_1")
-API_ID_2 = os.getenv("API_ID_2")
-API_HASH_2 = os.getenv("API_HASH_2")
+i = 1
+while True:
+    api_id = os.getenv(f"API_ID_{i}")
+    api_hash = os.getenv(f"API_HASH_{i}")
+    if api_id != None and api_hash != None:
+        api_ids.append(api_id)
+        api_hashes.append(api_hash)
+        i += 1
+    else:
+        break
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 admins: list[int] = [1503690284, 5899041406, 5501417707]
 
@@ -29,3 +39,6 @@ groups_for_sell = [] # -1001261922335, -1001588006106, -1001344216303, "-1001255
 
 spam_intervals = {"-1001255272018_98958": 300, # 300 seconds = 5 minutes
                   -1001344216303: 20} # 20 seconds
+
+# _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
+

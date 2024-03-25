@@ -1,2 +1,5 @@
 .env
 venv
+bot/sessions
+test.py
+test.session
