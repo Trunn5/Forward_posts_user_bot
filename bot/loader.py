@@ -1,4 +1,3 @@
-from aiogram import Bot, Dispatcher
 from pyrogram import Client, filters
 
 from bot import config
