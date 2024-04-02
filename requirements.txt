@@ -8,6 +8,7 @@ attrs==23.2.0
 certifi==2024.2.2
 croniter==2.0.1
 frozenlist==1.4.1
+greenlet==3.0.3
 idna==3.6
 magic-filter==1.0.12
 multidict==6.0.5
@@ -20,8 +21,10 @@ python-dateutil==2.8.2
 python-dotenv==1.0.1
 pytz==2024.1
 six==1.16.0
+SQLAlchemy==2.0.29
 TgCrypto==1.2.5
 typing_extensions==4.10.0
 tzdata==2023.4
 tzlocal==5.2
 yarl==1.9.4
+psycopg2

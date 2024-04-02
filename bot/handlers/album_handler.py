@@ -7,10 +7,11 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 
 from bot import config
-from bot.loader import clientManager
-from bot.sending import forward_post
-from bot.utils import Album
+from bot.utils.loader import clientManager
+from bot.utils.sending import forward_post
+from bot.utils.utils import Album
 from bot import globals
+from db.connection import session, SellChannelForward, SellChannelSource, RentChannelSource, RentChannelForward
 
 _tasks = set()
 T = TypeVar("T")
@@ -24,23 +25,22 @@ def background(coro: Coroutine[None, None, T]) -> asyncio.Task[T]:
     return task
 
 
-
-
 # chat_id: group_id: album
 _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 
 
 @(clientManager.clients[0]).on_message(filters.media_group)
 async def on_media_group(client: Client, message: Message):
-    print("HANDLER: GOT NEW MEDIA GROUP")
     try:
         chat_id = message.chat.id
         media_group_id = message.media_group_id
         if media_group_id is None:
             return
 
+        photo = await client.download_media(message, in_memory=True)
+
         if media_group_id not in _albums[chat_id]:
-            album = Album(photos=[message.photo.file_id], media_group_id=media_group_id,
+            album = Album(photos=[photo], media_group_id=media_group_id,
                           caption=(message.caption or ""), chat_id=chat_id)
             _albums[chat_id][media_group_id] = album
 
@@ -55,7 +55,7 @@ async def on_media_group(client: Client, message: Message):
             background(task())
         else:
             album = _albums[chat_id][media_group_id]
-            album.photos.append(message.photo.file_id)
+            album.photos.append(photo)
     finally:
         message.continue_propagation()
 
@@ -67,5 +67,7 @@ async def on_album(client: Client, album: Album):
     if not globals.SEND:
         return
 
-    if album.chat_id == config.rent_channel_id:
-        await forward_post(client, album, config.groups_for_rent)
+    if str(album.chat_id) == session.query(SellChannelSource).first().id:
+        await forward_post(album, [a.id for a in session.query(SellChannelForward).all()])
+    elif str(album.chat_id) == session.query(RentChannelSource).first().id:
+        await forward_post(album, [a.id for a in session.query(RentChannelForward).all()])

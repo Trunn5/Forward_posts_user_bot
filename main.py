@@ -1,13 +1,7 @@
-from pyrogram import compose, filters
+from pyrogram import compose
 
-from bot import config
-from bot.album_handler import on_media_group
-from bot.loader import bot, clientManager
-
-from bot import album_handler
-from bot.bot import handlers
-
-
+from bot.utils.loader import bot, clientManager
+from bot import *
 
 if __name__ == '__main__':
     print("Bot started.")

@@ -3,8 +3,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 
-from pyrogram.types import Message
-
 
 def is_valid_time_format(time_str):
     """Проверяют строку на формат HH:MM"""

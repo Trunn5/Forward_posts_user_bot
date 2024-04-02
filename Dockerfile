@@ -11,3 +11,4 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["python","-u", "main.py"]
+#CMD ["python","-u", "db/connection.py"]

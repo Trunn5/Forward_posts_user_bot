@@ -1,12 +1,13 @@
 import asyncio
 
-from pyrogram.errors import Flood, FloodWait
+from pyrogram.errors import FloodWait
 
 from bot import config
-from bot.loader import bot
+from bot.utils.loader import bot
 
 
 async def to_admin(text: str):
+    """Разослать в боте сообщение админам"""
     for admin in config.admins:
         try:
             await bot.send_message(admin, text)

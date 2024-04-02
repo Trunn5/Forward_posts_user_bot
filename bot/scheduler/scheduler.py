@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import Callable, Awaitable, Coroutine
+from typing import Callable
 
 
 class AsyncScheduler:

@@ -1,13 +1,11 @@
-import asyncio
-
 from pyrogram import filters
 from pyrogram.types import Message
 
-from .. import config
-from ..loader import scheduler, bot, clientManager
-from .. import globals
-from ..sending import sending
-from ..utils import is_valid_time_format
+from bot import config
+from bot.utils.loader import scheduler, bot, clientManager
+from bot import globals
+from bot.utils.sending import sending
+from bot.utils.utils import is_valid_time_format
 
 
 @bot.on_message(filters.user(config.admins) & filters.command('set_posts'))
@@ -47,7 +45,6 @@ async def delete(c, message: Message):
 async def add(c, message: Message):
     """Добавление нового времени"""
     time = message.text[5:]
-    print(time)
     if not is_valid_time_format(time):
         await message.reply("Введите /add HH:MM")
         return
@@ -59,7 +56,6 @@ async def add(c, message: Message):
 @bot.on_message(filters.user(config.admins) & filters.command('current'))
 async def current_tasks(client, message: Message):
     """Присылает текущие таймслоты на пересылку"""
-    print(12312313123)
     text = "Текущие расписание постов:\n" + '\n'.join([time for _, time, _ in scheduler.tasks])
     if len(scheduler.tasks) == 0: text += "Пусто"
     # print(message.text)

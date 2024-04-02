@@ -1,5 +1,5 @@
 .env
 venv
-bot/sessions
+bot/client/sessions
 test.py
 test.session
