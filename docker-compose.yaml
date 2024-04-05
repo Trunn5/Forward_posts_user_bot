@@ -3,31 +3,18 @@ version: '3.8'
 services:
   myapp:
     build: .
-    ports:
-      - "5000:5000"  # Замените порт, если ваше приложение использует другой порт
-    depends_on:
-      - db
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/bot  # Замените на свои данные
-      # Другие переменные окружения, необходимые вашему приложению
-    networks:
-      - postgres
+      - DATABASE_URL=postgresql://postgres:password@db:5432/bot
   db:
     image: postgres
     ports:
-      - "5430:5432"  # Порт PostgreSQL
+      - "5430:5432"
     environment:
-      POSTGRES_DB: bot  # Замените на название вашей базы данных
+      POSTGRES_DB: bot
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
 #    volumes:
 #      - postgres_data:/var/lib/postgresql/data  # Позволяет сохранять данные базы данных между запусками
 #    restart: always
-    networks:
-      - postgres
-networks:
-  postgres:
-    driver: bridge
-
 #volumes:
 #  postgres_data:

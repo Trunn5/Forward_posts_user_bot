@@ -1,6 +1,6 @@
 import asyncio
 
-from pyrogram.errors import SlowmodeWait
+from pyrogram.errors import SlowmodeWait, ChatWriteForbidden
 from pyrogram.types import InputMediaPhoto
 
 from bot import config
@@ -86,6 +86,9 @@ async def send_album(chat_id: str | int, album: Album):
     except SlowmodeWait as e:
         await asyncio.sleep(e.value)
         await send_album(chat_id, album)
+    except ChatWriteForbidden as e:
+        await to_admin(f"⛔️<b>Ошибка:</b> Аккаунт {(await bot.get_me()).username} не может отправить сообщение."
+                       f"\n💬<b>Чат:</b> {(await bot.get_chat(int(chat_id))).title}\n⚙️ Тип:\n{e}")
     except Exception as e:
         await to_admin(f"Ошибка!\n{e}")
 

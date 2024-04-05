@@ -1,6 +1,7 @@
 import asyncio
 
 from pyrogram import filters, Client
+from pyrogram.errors import PeerIdInvalid
 from pyrogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 
 from bot.bot.Start import start
@@ -16,7 +17,9 @@ async def sell(client: Client, message: Message):
     k = ReplyKeyboardMarkup(keyboard =
                             [[KeyboardButton("➕Добавить"),
                               KeyboardButton("➖Удалить"),
-                              KeyboardButton("✏️Изменить")]])
+                              KeyboardButton("✏️Изменить"),
+                              KeyboardButton("🔙Назад")]],
+                            resize_keyboard=True)
     fsm[message.from_user.id] = "sell"
     text = "Каналы продажи:\n"
     for chn in session.query(SellChannelForward).all():
@@ -26,7 +29,7 @@ async def sell(client: Client, message: Message):
                     f" - {chn.get_interval} с." + '\n'
             await asyncio.sleep(0.11)
         except Exception as e:
-            await to_admin(f"ОШИБКА: Не могу получить данные о чате {chn}: {e}")
+            await to_admin(f"⛔️<b>Ошибка:</b> Не могу получить данные о чате {chn}:\n{e}")
     await message.reply(text, reply_markup=k)
 
 
@@ -46,8 +49,10 @@ async def sell_adding(client: Client, message: Message):
         session.add(SellChannelForward(id=ch_id))
         session.commit()
         fsm[message.from_user.id] = ''
-        await message.reply(f"Канал {info.title} успешно добавлен")
+        await message.reply(f"✅Канал {info.title} успешно добавлен")
         await start(client, message)
+    except PeerIdInvalid as e:
+        await message.reply(f"⛔️<b>Ошибка:</b> Неверный айди чата.\n⚙️ Тип:\n{e}")
     except Exception as e:
         await message.reply(f"Ошибка! {e}")
 
@@ -97,4 +102,4 @@ async def sell_changing(client: Client, message: Message):
         await message.reply(f"успешно изменено на {interval}!")
         await sell(client, message)
     except Exception as e:
-        await message.reply("Ошибка!\ne")
+        await message.reply(f"Ошибка!\n{e}")

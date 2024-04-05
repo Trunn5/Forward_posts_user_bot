@@ -2,14 +2,14 @@ import asyncio
 from collections import defaultdict
 
 from pyrogram import Client
-
 from bot.bot.to_admin import to_admin
 from bot.utils.utils import Album
 
 
 async def get_old_albums(app: Client, chat_id: int, amount: int, used: list = []) -> list[Album]:
     albums: defaultdict[str, Album] = defaultdict()
-    await to_admin("Start getting messages ")
+    channel_title = (await app.get_chat(chat_id)).title
+    await to_admin(f"❗️ Начинаю сбор сообщений с группы: {channel_title}")
     async for message in app.get_chat_history(chat_id):
         try:
             media_group_id = message.media_group_id
@@ -27,13 +27,13 @@ async def get_old_albums(app: Client, chat_id: int, amount: int, used: list = []
                 album.caption = (message.caption or message.text or album.caption)
                 album.photos.append(photo)
         except Exception as e:
-            await to_admin(str(e))
+            await to_admin(f"⛔️<b>Ошибка:</b> {e.__cause__}\n💬<b>Канал:</b> {channel_title}\n⚙️ Тип: {e}")
             return []
         finally:
             await asyncio.sleep(0.02)
             if len(albums) == amount + 1:
                 break
-    await to_admin("Finished getting messages")
+    await to_admin("❗️ Закончил сбор сообщений")
     return [albums[group_id] for group_id in albums if len(albums[group_id].photos) > 1]
 
 

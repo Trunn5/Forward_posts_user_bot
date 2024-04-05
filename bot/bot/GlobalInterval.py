@@ -13,7 +13,7 @@ from db.connection import session, RentChannelForward, DefaultSpamValue
 @bot.on_message(filters.regex("⏱Глобальный интервал"))
 async def globalinterval(client: Client, message: Message):
     """Обработчик кнопки глобальный интервал"""
-    k = ReplyKeyboardRemove()
+    k = ReplyKeyboardMarkup(keyboard=[[KeyboardButton("🔙Назад")]], resize_keyboard=True)
     fsm[message.from_user.id] = "globalinterval"
     text = (f"Текущий интервал: {session.query(DefaultSpamValue).first().value}\n"
             f"Чтобы изменить напишите новое число, для выхода /start")
