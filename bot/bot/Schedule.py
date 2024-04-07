@@ -37,7 +37,7 @@ async def schedule_adding(client: Client, message: Message):
     """Добавление времени в расписание перессылки"""
     time = message.text
     if not is_valid_time_format(time):
-        await message.reply("Введите /add HH:MM")
+        await message.reply("Введите HH:MM")
         return
     fsm[message.from_user.id] = ''
     await scheduler.add_task(task=sending, run_time=time)
@@ -57,7 +57,7 @@ async def schedule_rming(client: Client, message: Message):
     """Удаление времени из расписания"""
     time = message.text
     if not is_valid_time_format(time):
-        await message.reply("Введите /add HH:MM")
+        await message.reply("Введите HH:MM")
         return
     if await scheduler.remove_task(sending, time):
         await message.reply(f"Успешно удалено время {time}")

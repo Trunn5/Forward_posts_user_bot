@@ -48,7 +48,7 @@ async def source_changing_sell(client: Client, message: Message):
         fsm[message.from_user.id] = ''
         await message.reply(f"Канал для продаж: {info.title}  - успешно обновлен")
     except Exception as e:
-        await message.reply(f"Ошибка! {e}")
+        await message.reply(f"⛔️Ошибка!\n{e}")
 
 
 @bot.on_message(filters.regex("✏️Изменить АРЕНДА") & fsm_filter("source"))
@@ -70,4 +70,4 @@ async def source_changing_rent(client: Client, message: Message):
         fsm[message.from_user.id] = ''
         await message.reply(f"Канал для аренды: {info.title}  - успешно обновлен")
     except Exception as e:
-        await message.reply(f"Ошибка! {e}")
+        await message.reply(f"⛔️Ошибка!\n{e}")

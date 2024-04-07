@@ -60,6 +60,7 @@ class UserBot(Base):
     __tablename__ = 'user_bots'
 
     name = Column(Integer, primary_key=True, autoincrement=True)
+
     session_string = Column(String)
 
 

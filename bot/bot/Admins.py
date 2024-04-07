@@ -38,7 +38,7 @@ async def admins_adding(client: Client, message: Message):
         await message.reply(f"Админ {message.text} добавлен.")
         await admins(client, message)
     except Exception as e:
-        await message.reply(f"Ошибка! {e}")
+        await message.reply(f"⛔️Ошибка!\n{e}")
 
 
 @bot.on_message(filters.regex("➖Удалить") & fsm_filter("admins"))
@@ -59,4 +59,4 @@ async def admins_rming(client: Client, message: Message):
         await message.reply(f"Админ {message.text} удален.")
         await admins(client, message)
     except Exception as e:
-        await message.reply(f"Ошибка! {e}")
+        await message.reply(f"⛔️Ошибка!\n{e}")

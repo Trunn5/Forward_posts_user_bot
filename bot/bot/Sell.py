@@ -46,6 +46,8 @@ async def sell_adding(client: Client, message: Message):
     try:
         ch_id = message.text
         info = await clientManager.clients[0].get_chat(int(ch_id.split('_')[0]))
+        if session.query(SellChannelForward).filter_by(id=ch_id).first() != None:
+            raise Exception("Такой чат уже добавлен.")
         session.add(SellChannelForward(id=ch_id))
         session.commit()
         fsm[message.from_user.id] = ''
@@ -54,7 +56,7 @@ async def sell_adding(client: Client, message: Message):
     except PeerIdInvalid as e:
         await message.reply(f"⛔️<b>Ошибка:</b> Неверный айди чата.\n⚙️ Тип:\n{e}")
     except Exception as e:
-        await message.reply(f"Ошибка! {e}")
+        await message.reply(f"⛔️Ошибка!\n{e}")
 
 
 @bot.on_message(filters.regex("➖Удалить") & fsm_filter("sell"))
@@ -79,7 +81,8 @@ async def sell_rming(client: Client, message: Message):
         await message.reply(f"Канал {info.title} успешно УДАЛЕН.")
         await start(client, message)
     except Exception as e:
-        await message.reply(f"Ошибка!: {e}")
+        await message.reply(f"⛔️Ошибка:\n{e.__cause__}\n"
+                            f"⚙️Тип:\n{e}")
 
 
 @bot.on_message(filters.regex("✏️Изменить") & fsm_filter("sell"))
@@ -95,11 +98,12 @@ async def sell_changing(client: Client, message: Message):
     """Изменение интервала пересылки у чата"""
     try:
         chat_id, interval = message.text.split()
-        ch_id = session.query(SellChannelForward).filter_by(id=chat_id).first()
-        ch_id.interval = int(interval)
+        ch = session.query(SellChannelForward).filter_by(id=chat_id).first()
+        ch.interval = int(interval)
         session.commit()
         fsm[message.from_user.id] = ''
         await message.reply(f"успешно изменено на {interval}!")
         await sell(client, message)
     except Exception as e:
-        await message.reply(f"Ошибка!\n{e}")
+        await message.reply(f"⛔️Ошибка:\n{e.__cause__}\n"
+                            f"⚙️Тип:\n{e}")

@@ -90,7 +90,7 @@ async def send_album(chat_id: str | int, album: Album):
         await to_admin(f"⛔️<b>Ошибка:</b> Аккаунт {(await bot.get_me()).username} не может отправить сообщение."
                        f"\n💬<b>Чат:</b> {(await bot.get_chat(int(chat_id))).title}\n⚙️ Тип:\n{e}")
     except Exception as e:
-        await to_admin(f"Ошибка!\n{e}")
+        await to_admin(f"⛔️Ошибка!\n{e}")
 
 
 async def forwards_to_chats_unique(messages: list[Album], groups: list[RentChannelForward | SellChannelForward]):

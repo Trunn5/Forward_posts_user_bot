@@ -27,7 +27,7 @@ async def globalinterval_changing(client: Client, message: Message):
         session.query(DefaultSpamValue).first().value = int(message.text)
         session.commit()
     except Exception as e:
-        await message.reply(f"Ошибка! {e}")
+        await message.reply(f"⛔️Ошибка!\n{e}")
         return
 
     fsm[message.from_user.id] = ""

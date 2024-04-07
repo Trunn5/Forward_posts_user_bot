@@ -45,6 +45,8 @@ async def rent_adding(client: Client, message: Message):
     """Добавление канала аренды."""
     try:
         ch_id = message.text
+        if session.query(RentChannelForward).filter_by(id=ch_id).first() != None:
+            raise Exception("Такой чат уже добавлен.")
         info = await clientManager.clients[0].get_chat(int(ch_id.split('_')[0]))
         session.add(RentChannelForward(id=ch_id))
         session.commit()
@@ -52,7 +54,7 @@ async def rent_adding(client: Client, message: Message):
         await message.reply(f"Канал {info.title} успешно добавлен")
         await start(client, message)
     except Exception as e:
-        await message.reply(f"Ошибка! {e}")
+        await message.reply(f"⛔️Ошибка! {e}")
 
 
 @bot.on_message(filters.regex("➖Удалить") & fsm_filter("rent"))
@@ -76,7 +78,7 @@ async def rent_rming(client: Client, message: Message):
         fsm[message.from_user.id] = ''
         await message.reply(f"Канал {info.title} успешно УДАЛЕН.")
     except Exception as e:
-        await message.reply(f"Ошибка!: {e}")
+        await message.reply(f"⛔️Ошибка!:\n{e}")
 
 
 @bot.on_message(filters.regex("✏️Изменить") & fsm_filter("rent"))
@@ -101,4 +103,4 @@ async def rent_changing(client: Client, message: Message):
     except PeerIdInvalid as e:
         await message.reply(f"⛔️<b>Ошибка:</b> Неверный айди чата.\n⚙️ Тип:\n{e}")
     except Exception as e:
-        await message.reply("Ошибка!\ne")
+        await message.reply(f"⛔️Ошибка!\n{e}")

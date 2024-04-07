@@ -37,15 +37,14 @@ async def on_media_group(client: Client, message: Message):
         if media_group_id is None:
             return
 
-        photo = await client.download_media(message, in_memory=True)
 
         if media_group_id not in _albums[chat_id]:
-            album = Album(photos=[photo], media_group_id=media_group_id,
+            album = Album(photos=[message], media_group_id=media_group_id,
                           caption=(message.caption or ""), chat_id=chat_id)
             _albums[chat_id][media_group_id] = album
 
             async def task():
-                await asyncio.sleep(1)
+                await asyncio.sleep(2)
                 _albums[chat_id].pop(media_group_id, None)
                 try:
                     await on_album(client, album)
@@ -55,7 +54,7 @@ async def on_media_group(client: Client, message: Message):
             background(task())
         else:
             album = _albums[chat_id][media_group_id]
-            album.photos.append(photo)
+            album.photos.append(message)
     finally:
         message.continue_propagation()
 
@@ -66,6 +65,9 @@ async def on_album(client: Client, album: Album):
     """
     if not globals.SEND:
         return
+
+    for i, message in enumerate(album.photos):
+        album.photos[i] = await client.download_media(message, in_memory=True)
 
     if str(album.chat_id) == session.query(SellChannelSource).first().id:
         await forward_post(album, [a.id for a in session.query(SellChannelForward).all()])
