@@ -72,25 +72,33 @@ async def forward_post(album: Album, groups: list[int | str]):
             await to_admin(e)
 
 
-async def send_album(chat_id: str | int, album: Album):
+async def send_album(chat_id: str | int, album: Album, user_bot_id: int = -1):
     media = [InputMediaPhoto(media=album.photos[0], caption=album.caption)]
     # rest photos without caption
     media += [InputMediaPhoto(media=photo) for photo in album.photos[1:]]
     chat_id, reply_id = str(chat_id).split('_') if '_' in chat_id else chat_id, None
-
+    if user_bot_id >= len(clientManager.clients):
+        return
     try:
-        bot = clientManager.get_worker()
+        if user_bot_id == -1:
+            bot = clientManager.get_worker()
+        else:
+            bot = clientManager.clients[user_bot_id]
         await bot.send_media_group(chat_id=int(chat_id), reply_to_message_id=reply_id, media=media)
         await asyncio.sleep(0.2)
-        return 1
     except SlowmodeWait as e:
         await asyncio.sleep(e.value)
         await send_album(chat_id, album)
-    except ChatWriteForbidden as e:
-        await to_admin(f"⛔️<b>Ошибка:</b> Аккаунт {(await bot.get_me()).username} не может отправить сообщение."
-                       f"\n💬<b>Чат:</b> {(await bot.get_chat(int(chat_id))).title}\n⚙️ Тип:\n{e}")
-    except Exception as e:
-        await to_admin(f"⛔️Ошибка!\n{e}")
+    except Exception:
+        await to_admin(f"⛔️<b>Ошибка:</b> {(await bot.get_me()).username} не может отправить сообщение в {chat_id}\n"
+                       f"Попытка с другим аккаунтом...")
+        await asyncio.sleep(1)
+        await send_album(chat_id, album, (user_bot_id+1)%len(clientManager.clients))
+    # except ChatWriteForbidden as e:
+    #     await to_admin(f"⛔️<b>Ошибка:</b> Аккаунт {(await bot.get_me()).username} не может отправить сообщение."
+    #                    f"\n💬<b>Чат:</b> {(await bot.get_chat(int(chat_id))).title}\n⚙️ Тип:\n{e}")
+    # except Exception as e:
+    #     await to_admin(f"⛔️Ошибка!\n{e}")
 
 
 async def forwards_to_chats_unique(messages: list[Album], groups: list[RentChannelForward | SellChannelForward]):

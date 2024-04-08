@@ -10,9 +10,9 @@ from db.connection import session, Admin
 async def admins(client: Client, message: Message):
     """Обработчик кнопки админы"""
     k = ReplyKeyboardMarkup(keyboard =
-                            [[KeyboardButton("➕Добавить"),
-                              KeyboardButton("➖Удалить"),
-                              KeyboardButton("🔙Назад")]],
+                            [[KeyboardButton("➕Добавить")],
+                              [KeyboardButton("➖Удалить")],
+                              [KeyboardButton("🔙Назад")]],
                             resize_keyboard=True)
     fsm[message.from_user.id] = "admins"
     text = "Текущие админы:\n"

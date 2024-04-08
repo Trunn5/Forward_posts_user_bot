@@ -1,7 +1,7 @@
 import asyncio
 
 from pyrogram import filters, Client
-from pyrogram.errors import PeerIdInvalid
+from pyrogram.errors import PeerIdInvalid, ChannelInvalid
 from pyrogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 
 from bot.bot.Start import start
@@ -15,21 +15,17 @@ from db.connection import session, RentChannelForward
 async def rent(client: Client, message: Message):
     """Обработчик кнопки Аренда"""
     k = ReplyKeyboardMarkup(keyboard =
-                            [[KeyboardButton("➕Добавить"),
-                              KeyboardButton("➖Удалить"),
-                              KeyboardButton("✏️Изменить"),
-                              KeyboardButton("🔙Назад")]],
+                            [[KeyboardButton("➕Добавить")],
+                              [KeyboardButton("➖Удалить")],
+                              [KeyboardButton("✏️Изменить")],
+                              [KeyboardButton("🔙Назад")]],
                             resize_keyboard=True)
     fsm[message.from_user.id] = "rent"
     text = "Каналы Аренды:\n"
+
     for chn in session.query(RentChannelForward).all():
-        try:
-            ch_id = int(chn.id.split('_')[0])
-            text += f"{chn.id}: " + (await clientManager.clients[0].get_chat(ch_id)).title + \
-                    f" - {chn.get_interval} с." + '\n'
-            await asyncio.sleep(0.11)
-        except Exception as e:
-            await to_admin(f"⛔️<b>Ошибка:</b> Не могу получить данные о чате {chn}:\n{e}")
+        text += f"{chn.id}: {chn.title} - {chn.get_interval} с." + '\n'
+
     await message.reply(text, reply_markup=k)
 
 
@@ -47,8 +43,17 @@ async def rent_adding(client: Client, message: Message):
         ch_id = message.text
         if session.query(RentChannelForward).filter_by(id=ch_id).first() != None:
             raise Exception("Такой чат уже добавлен.")
-        info = await clientManager.clients[0].get_chat(int(ch_id.split('_')[0]))
-        session.add(RentChannelForward(id=ch_id))
+
+        while True:
+            user_bot = clientManager.get_worker()
+            try:
+                info = await user_bot.get_chat(int(ch_id.split('_')[0]))
+                break
+            except ChannelInvalid as e:
+                await to_admin(f"<b>Ошибка:</b> Юзер-бот {(await user_bot.get_me()).id} не может получить данные о чате"
+                               f" {ch_id}: {ch_id}")
+
+        session.add(RentChannelForward(id=ch_id, title=info.title))
         session.commit()
         fsm[message.from_user.id] = ''
         await message.reply(f"Канал {info.title} успешно добавлен")

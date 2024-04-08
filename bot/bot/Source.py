@@ -10,9 +10,9 @@ from db.connection import session, RentChannelSource, SellChannelSource
 async def source(client: Client, message: Message):
     """Обработчик кнопки источник"""
     k = ReplyKeyboardMarkup(keyboard =
-                            [[KeyboardButton("✏️Изменить ПРОДАЖА"),
-                              KeyboardButton("✏️Изменить АРЕНДА"),
-                              KeyboardButton("🔙Назад")]],
+                            [[KeyboardButton("✏️Изменить ПРОДАЖА")],
+                              [KeyboardButton("✏️Изменить АРЕНДА")],
+                              [KeyboardButton("🔙Назад")]],
                             resize_keyboard=True)
     fsm[message.from_user.id] = "source"
 

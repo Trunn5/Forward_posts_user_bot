@@ -10,7 +10,7 @@ async def to_admin(text: str):
     """Разослать в боте сообщение админам"""
     for admin in config.admins:
         try:
-            await bot.send_message(admin, text, parse_mode="html")
+            await bot.send_message(int(admin), text, parse_mode="html")
             await asyncio.sleep(1)
         except FloodWait as e:
             await asyncio.sleep(e.value)

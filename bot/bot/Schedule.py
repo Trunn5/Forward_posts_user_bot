@@ -14,10 +14,10 @@ async def schedule(client: Client, message: Message):
     выводит текущие расписание,
     возможность добавить/удалить."""
     k = ReplyKeyboardMarkup(keyboard =[
-                            [KeyboardButton("➕Добавить"),
-                             KeyboardButton("➖Удалить"),
-                             KeyboardButton("🔙Назад")
-                             ]],
+                            [KeyboardButton("➕Добавить")],
+                             [KeyboardButton("➖Удалить")],
+                             [KeyboardButton("🔙Назад")]
+                              ],
                             resize_keyboard=True)
     fsm[message.from_user.id] = "schedule"
     text = "Текущие расписание постов:\n" + '\n'.join([time for _, time, _ in scheduler.tasks])

@@ -18,6 +18,7 @@ class DefaultSpamValue(Base):
 class SellChannelForward(Base):
     __tablename__ = 'forward_sell_channels'
     id = Column(String, primary_key=True)
+    title = Column(String)
     interval = Column(Integer, default=None)
     @property
     def get_interval(self):
@@ -30,6 +31,7 @@ class RentChannelForward(Base):
     __tablename__ = 'forward_rent_channels'
 
     id = Column(String, primary_key=True)
+    title = Column(String)
     interval = Column(Integer, default=None)
 
     @property
