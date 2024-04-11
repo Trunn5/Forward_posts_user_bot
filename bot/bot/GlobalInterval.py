@@ -1,16 +1,12 @@
-import asyncio
-
 from pyrogram import filters, Client
 from pyrogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
-from bot.bot.Start import start
 from bot.bot.fsm import fsm, fsm_filter
-from bot.bot.to_admin import to_admin
-from bot.utils.loader import bot, clientManager
-from db.connection import session, RentChannelForward, DefaultSpamValue
+from bot.utils.loader import bot_client
+from db.connection import session, DefaultSpamValue
 
 
-@bot.on_message(filters.regex("⏱Глобальный интервал"))
+@bot_client.on_message(filters.regex("⏱Глобальный интервал"))
 async def globalinterval(client: Client, message: Message):
     """Обработчик кнопки глобальный интервал"""
     k = ReplyKeyboardMarkup(keyboard=[[KeyboardButton("🔙Назад")]], resize_keyboard=True)
@@ -20,7 +16,7 @@ async def globalinterval(client: Client, message: Message):
     await message.reply(text, reply_markup=k)
 
 
-@bot.on_message(filters.text & fsm_filter("globalinterval"))
+@bot_client.on_message(filters.text & fsm_filter("globalinterval"))
 async def globalinterval_changing(client: Client, message: Message):
     """Изменение глобального интервала"""
     try:

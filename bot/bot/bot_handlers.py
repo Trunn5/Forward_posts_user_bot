@@ -2,13 +2,13 @@ from pyrogram import filters
 from pyrogram.types import Message
 
 from bot import config
-from bot.utils.loader import scheduler, bot, clientManager
+from bot.utils.loader import scheduler, bot_client, clientManager
 from bot import globals
 from bot.utils.sending import sending
 from bot.utils.utils import is_valid_time_format
 
 
-@bot.on_message(filters.user(config.admins) & filters.command('set_posts'))
+@bot_client.on_message(filters.user(config.admins) & filters.command('set_posts'))
 async def set_posts(c, message: Message):
     """ установить нужное количество постов для пересылки """
     try:
@@ -18,7 +18,7 @@ async def set_posts(c, message: Message):
         await message.reply("Введите /set_posts число")
 
 
-@bot.on_message(filters.user(config.admins) & filters.command('switch'))
+@bot_client.on_message(filters.user(config.admins) & filters.command('switch'))
 async def switch(c, message: Message):
     """ вкл/выкл пересылки """
     if globals.SEND:
@@ -28,7 +28,7 @@ async def switch(c, message: Message):
     await message.reply(f"моментальная пересылка {'вкл' if globals.SEND else 'выкл'}")
 
 
-@bot.on_message(filters.user(config.admins) & filters.command('delete'))
+@bot_client.on_message(filters.user(config.admins) & filters.command('delete'))
 async def delete(c, message: Message):
     """Удаление нового времени"""
     time = message.text[8:]
@@ -41,7 +41,7 @@ async def delete(c, message: Message):
 
 
 
-@bot.on_message(filters.user(config.admins) & filters.command('add'))
+@bot_client.on_message(filters.user(config.admins) & filters.command('add'))
 async def add(c, message: Message):
     """Добавление нового времени"""
     time = message.text[5:]
@@ -53,7 +53,7 @@ async def add(c, message: Message):
 
 
 
-@bot.on_message(filters.user(config.admins) & filters.command('current'))
+@bot_client.on_message(filters.user(config.admins) & filters.command('current'))
 async def current_tasks(client, message: Message):
     """Присылает текущие таймслоты на пересылку"""
     text = "Текущие расписание постов:\n" + '\n'.join([time for _, time, _ in scheduler.tasks])
@@ -62,7 +62,7 @@ async def current_tasks(client, message: Message):
     await message.reply(text)
 
 
-@bot.on_message(filters.user(config.admins) & filters.command('do_sleep'))
+@bot_client.on_message(filters.user(config.admins) & filters.command('do_sleep'))
 async def do_sleep(c, message: Message):
     try:
         clientManager.is_working[int(message.command[1]) - 1] = False
@@ -71,7 +71,7 @@ async def do_sleep(c, message: Message):
         await message.reply(e)
 
 
-@bot.on_message(filters.user(config.admins) & filters.command('do_work'))
+@bot_client.on_message(filters.user(config.admins) & filters.command('do_work'))
 async def do_work(c, message: Message):
     try:
         clientManager.is_working[int(message.command[1]) - 1] = True

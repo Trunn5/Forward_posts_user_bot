@@ -1,5 +1,3 @@
-import asyncio
-
 from pyrogram import filters, Client
 from pyrogram.errors import PeerIdInvalid, ChannelInvalid
 from pyrogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
@@ -7,11 +5,11 @@ from pyrogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from bot.bot.Start import start
 from bot.bot.fsm import fsm, fsm_filter
 from bot.bot.to_admin import to_admin
-from bot.utils.loader import bot, clientManager
+from bot.utils.loader import bot_client, clientManager
 from db.connection import session, RentChannelForward
 
 
-@bot.on_message(filters.regex("🏠Аренда"))
+@bot_client.on_message(filters.regex("🏠Аренда"))
 async def rent(client: Client, message: Message):
     """Обработчик кнопки Аренда"""
     k = ReplyKeyboardMarkup(keyboard =
@@ -29,20 +27,20 @@ async def rent(client: Client, message: Message):
     await message.reply(text, reply_markup=k)
 
 
-@bot.on_message(filters.regex("➕Добавить") & fsm_filter("rent"))
+@bot_client.on_message(filters.regex("➕Добавить") & fsm_filter("rent"))
 async def rent_add(client: Client, message: Message):
     """Обработчик кнопки добавить канал аренды."""
     fsm[message.from_user.id] += "_add"
     await message.reply("Отправьте id канала для перессылки аренды.")
 
 
-@bot.on_message(filters.text & fsm_filter("rent_add"))
+@bot_client.on_message(filters.text & fsm_filter("rent_add"))
 async def rent_adding(client: Client, message: Message):
     """Добавление канала аренды."""
     try:
         ch_id = message.text
         if session.query(RentChannelForward).filter_by(id=ch_id).first() != None:
-            raise Exception("Такой чат уже добавлен.")
+            raise "Такой чат уже добавлен."
 
         while True:
             user_bot = clientManager.get_worker()
@@ -62,14 +60,14 @@ async def rent_adding(client: Client, message: Message):
         await message.reply(f"⛔️Ошибка! {e}")
 
 
-@bot.on_message(filters.regex("➖Удалить") & fsm_filter("rent"))
+@bot_client.on_message(filters.regex("➖Удалить") & fsm_filter("rent"))
 async def rent_rm(client: Client, message: Message):
     """Обработчик кнопки удаления канада Аренд."""
     fsm[message.from_user.id] += "_rm"
     await message.reply("Отправьте id канала для перессылки аренды.")
 
 
-@bot.on_message(filters.text & fsm_filter("rent_rm"))
+@bot_client.on_message(filters.text & fsm_filter("rent_rm"))
 async def rent_rming(client: Client, message: Message):
     """Удаление канала для аренды из списка."""
     try:
@@ -86,7 +84,7 @@ async def rent_rming(client: Client, message: Message):
         await message.reply(f"⛔️Ошибка!:\n{e}")
 
 
-@bot.on_message(filters.regex("✏️Изменить") & fsm_filter("rent"))
+@bot_client.on_message(filters.regex("✏️Изменить") & fsm_filter("rent"))
 async def rent_change(client: Client, message: Message):
     """Обработчик кнопки изменить"""
     fsm[message.from_user.id] += '_change'
@@ -94,7 +92,7 @@ async def rent_change(client: Client, message: Message):
                         "-100123123 60")
 
 
-@bot.on_message(filters.text & fsm_filter("rent_change"))
+@bot_client.on_message(filters.text & fsm_filter("rent_change"))
 async def rent_changing(client: Client, message: Message):
     """Изменение интервала пересылки у чата"""
     try:

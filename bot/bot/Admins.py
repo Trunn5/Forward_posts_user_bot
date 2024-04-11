@@ -2,11 +2,11 @@ from pyrogram import filters, Client
 from pyrogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
 from bot.bot.fsm import fsm, fsm_filter
-from bot.utils.loader import bot
+from bot.utils.loader import bot_client
 from db.connection import session, Admin
 
 
-@bot.on_message(filters.regex("👥Админы"))
+@bot_client.on_message(filters.regex("👥Админы"))
 async def admins(client: Client, message: Message):
     """Обработчик кнопки админы"""
     k = ReplyKeyboardMarkup(keyboard =
@@ -21,14 +21,14 @@ async def admins(client: Client, message: Message):
     await message.reply(text, reply_markup=k)
 
 
-@bot.on_message(filters.regex("➕Добавить") & fsm_filter("admins"))
+@bot_client.on_message(filters.regex("➕Добавить") & fsm_filter("admins"))
 async def admins_add(client: Client, message: Message):
     """Обработчик кнопки добавить """
     fsm[message.from_user.id] += '_add'
     await message.reply("Отрпавьте id нового админа.")
 
 
-@bot.on_message(filters.text & fsm_filter("admins_add"))
+@bot_client.on_message(filters.text & fsm_filter("admins_add"))
 async def admins_adding(client: Client, message: Message):
     """Добавление нового админа"""
     try:
@@ -41,14 +41,14 @@ async def admins_adding(client: Client, message: Message):
         await message.reply(f"⛔️Ошибка!\n{e}")
 
 
-@bot.on_message(filters.regex("➖Удалить") & fsm_filter("admins"))
+@bot_client.on_message(filters.regex("➖Удалить") & fsm_filter("admins"))
 async def admins_rm(client: Client, message: Message):
     """Обработчик кнопки добавить """
     fsm[message.from_user.id] += '_rm'
     await message.reply("Отрпавьте id нового админа.")
 
 
-@bot.on_message(filters.text & fsm_filter("admins_rm"))
+@bot_client.on_message(filters.text & fsm_filter("admins_rm"))
 async def admins_rming(client: Client, message: Message):
     """Добавление нового админа"""
     try:

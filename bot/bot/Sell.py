@@ -7,11 +7,11 @@ from pyrogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from bot.bot.Start import start
 from bot.bot.fsm import fsm, fsm_filter
 from bot.bot.to_admin import to_admin
-from bot.utils.loader import bot, clientManager
+from bot.utils.loader import bot_client, clientManager
 from db.connection import session, SellChannelForward
 
 
-@bot.on_message(filters.regex("💰Продажа"))
+@bot_client.on_message(filters.regex("💰Продажа"))
 async def sell(client: Client, message: Message):
     """Обработчик кнопки продажа"""
     k = ReplyKeyboardMarkup(keyboard =
@@ -29,21 +29,21 @@ async def sell(client: Client, message: Message):
     await message.reply(text, reply_markup=k)
 
 
-@bot.on_message(filters.regex("➕Добавить") & fsm_filter("sell"))
+@bot_client.on_message(filters.regex("➕Добавить") & fsm_filter("sell"))
 async def sell_add(client: Client, message: Message):
     """Обработчик кнопки добавить канал продаж."""
     fsm[message.from_user.id] += "_add"
     await message.reply("Отправьте id канала для перессылки продаж.")
 
 
-@bot.on_message(filters.text & fsm_filter("sell_add"))
+@bot_client.on_message(filters.text & fsm_filter("sell_add"))
 async def sell_adding(client: Client, message: Message):
     """Добавление канада продаж."""
     try:
         ch_id = message.text
 
         if session.query(SellChannelForward).filter_by(id=ch_id).first() != None:
-            raise Exception("Такой чат уже добавлен.")
+            raise "Такой чат уже добавлен."
 
         while True:
             user_bot = clientManager.get_worker()
@@ -65,14 +65,14 @@ async def sell_adding(client: Client, message: Message):
         await message.reply(f"⛔️Ошибка!\n{e}")
 
 
-@bot.on_message(filters.regex("➖Удалить") & fsm_filter("sell"))
+@bot_client.on_message(filters.regex("➖Удалить") & fsm_filter("sell"))
 async def sell_rm(client: Client, message: Message):
     """Обработчик кнопки удаления канада продаж."""
     fsm[message.from_user.id] += "_rm"
     await message.reply("Отправьте id канала для перессылки продаж.")
 
 
-@bot.on_message(filters.text & fsm_filter("sell_rm"))
+@bot_client.on_message(filters.text & fsm_filter("sell_rm"))
 async def sell_rming(client: Client, message: Message):
     """Удаление канала для продаж из списка."""
     try:
@@ -91,7 +91,7 @@ async def sell_rming(client: Client, message: Message):
                             f"⚙️Тип:\n{e}")
 
 
-@bot.on_message(filters.regex("✏️Изменить") & fsm_filter("sell"))
+@bot_client.on_message(filters.regex("✏️Изменить") & fsm_filter("sell"))
 async def sell_change(client: Client, message: Message):
     """Обработчик кнопки изменить"""
     fsm[message.from_user.id] += '_change'
@@ -99,7 +99,7 @@ async def sell_change(client: Client, message: Message):
                         "-100123123 60")
 
 
-@bot.on_message(filters.text & fsm_filter("sell_change"))
+@bot_client.on_message(filters.text & fsm_filter("sell_change"))
 async def sell_changing(client: Client, message: Message):
     """Изменение интервала пересылки у чата"""
     try:

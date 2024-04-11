@@ -3,12 +3,12 @@ from pyrogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 
 from bot.bot import start
 from bot.bot.fsm import fsm, fsm_filter
-from bot.utils.loader import bot, scheduler
+from bot.utils.loader import bot_client, scheduler
 from bot.utils.sending import sending
 from bot.utils.utils import is_valid_time_format
 
 
-@bot.on_message(filters.regex("🗓Расписание"))
+@bot_client.on_message(filters.regex("🗓Расписание"))
 async def schedule(client: Client, message: Message):
     """Обработчик кнпоки расписание,
     выводит текущие расписание,
@@ -25,14 +25,14 @@ async def schedule(client: Client, message: Message):
     await message.reply(text, reply_markup=k)
 
 
-@bot.on_message(filters.regex("➕Добавить") & fsm_filter("schedule"))
+@bot_client.on_message(filters.regex("➕Добавить") & fsm_filter("schedule"))
 async def schedule_add(client: Client, message: Message):
     """Обработчик кнопки на добавление времени в расписание"""
     fsm[message.from_user.id] += "_add"
     await message.reply("Отправьте время (hh:mm).")
 
 
-@bot.on_message(filters.text & fsm_filter("schedule_add"))
+@bot_client.on_message(filters.text & fsm_filter("schedule_add"))
 async def schedule_adding(client: Client, message: Message):
     """Добавление времени в расписание перессылки"""
     time = message.text
@@ -45,14 +45,14 @@ async def schedule_adding(client: Client, message: Message):
     await start(client, message)
 
 
-@bot.on_message(filters.regex("➖Удалить") & fsm_filter("schedule"))
+@bot_client.on_message(filters.regex("➖Удалить") & fsm_filter("schedule"))
 async def schedule_rm(client: Client, message: Message):
     """Обработчик кнопки на удаление времени из расписания"""
     fsm[message.from_user.id] += "_rm"
     await message.reply("Отправьте время (hh:mm).")
 
 
-@bot.on_message(filters.text & fsm_filter("schedule_rm"))
+@bot_client.on_message(filters.text & fsm_filter("schedule_rm"))
 async def schedule_rming(client: Client, message: Message):
     """Удаление времени из расписания"""
     time = message.text

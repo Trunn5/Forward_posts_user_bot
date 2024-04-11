@@ -29,7 +29,7 @@ def background(coro: Coroutine[None, None, T]) -> asyncio.Task[T]:
 _albums: defaultdict[int, dict[str, Album]] = defaultdict(dict)
 
 
-@(clientManager.clients[0]).on_message(filters.media_group)
+@(clientManager.clients[0].client).on_message(filters.media_group)
 async def on_media_group(client: Client, message: Message):
     try:
         chat_id = message.chat.id
